@@ -24,7 +24,7 @@
 
   <style>
     [x-cloak] { display: none !important; }
-    /* Hide touch highlights & selections for a native app feel */
+    /* Hide touch highlights & selections for native feel */
     body {
       -webkit-tap-highlight-color: transparent;
       user-select: none;
@@ -40,8 +40,14 @@
         <span>🥗</span> MacroTracker
       </h1>
       <div class="flex items-center gap-2">
+        <!-- Language Switcher -->
+        <div class="flex bg-slate-900 p-0.5 rounded-lg border border-slate-700 text-xs font-bold">
+          <button @click="lang = 'en'; saveData()" :class="lang === 'en' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" class="px-2 py-0.5 rounded transition">EN</button>
+          <button @click="lang = 'bg'; saveData()" :class="lang === 'bg' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" class="px-2 py-0.5 rounded transition">BG</button>
+        </div>
+
         <button @click="showJsonDrawer = true" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-medium transition active:scale-95">
-          📥 JSON Field
+          <span x-text="i18n[lang].jsonField"></span>
         </button>
       </div>
     </div>
@@ -51,11 +57,9 @@
 
     <!-- Primary Tab View Toggle -->
     <div class="grid grid-cols-2 bg-slate-800 p-1 rounded-xl border border-slate-700 text-sm font-semibold">
-      <button @click="activeTab = 'daily'" :class="activeTab === 'daily' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition">
-        Daily Log
+      <button @click="activeTab = 'daily'" :class="activeTab === 'daily' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition" x-text="i18n[lang].dailyLog">
       </button>
-      <button @click="activeTab = 'weekly'" :class="activeTab === 'weekly' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition">
-        Weekly Analytics
+      <button @click="activeTab = 'weekly'" :class="activeTab === 'weekly' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'" class="py-2 rounded-lg transition" x-text="i18n[lang].weeklyAnalytics">
       </button>
     </div>
 
@@ -66,16 +70,14 @@
       <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700 shadow-sm space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-xs text-slate-400 font-medium uppercase tracking-wider">Calories Today</h2>
+            <h2 class="text-xs text-slate-400 font-medium uppercase tracking-wider" x-text="i18n[lang].caloriesToday"></h2>
             <p class="text-2xl font-black text-slate-100" x-text="`${totals.calories} / ${targets.calories} kcal`"></p>
           </div>
           <!-- Chart View Toggle -->
           <div class="flex bg-slate-900 p-1 rounded-lg border border-slate-700 text-xs font-semibold">
-            <button @click="chartType = 'bars'; renderChart()" :class="chartType === 'bars' ? 'bg-slate-700 text-emerald-400' : 'text-slate-400'" class="px-2.5 py-1 rounded transition">
-              Vertical Bars
+            <button @click="chartType = 'bars'; renderChart()" :class="chartType === 'bars' ? 'bg-slate-700 text-emerald-400' : 'text-slate-400'" class="px-2.5 py-1 rounded transition" x-text="i18n[lang].verticalBars">
             </button>
-            <button @click="chartType = 'pie'; renderChart()" :class="chartType === 'pie' ? 'bg-slate-700 text-emerald-400' : 'text-slate-400'" class="px-2.5 py-1 rounded transition">
-              Macro Pie
+            <button @click="chartType = 'pie'; renderChart()" :class="chartType === 'pie' ? 'bg-slate-700 text-emerald-400' : 'text-slate-400'" class="px-2.5 py-1 rounded transition" x-text="i18n[lang].macroPie">
             </button>
           </div>
         </div>
@@ -88,15 +90,15 @@
         <!-- Macro Badges -->
         <div class="grid grid-cols-3 gap-2 pt-2 text-center text-xs">
           <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700">
-            <span class="text-sky-400 block font-bold">Carbs</span>
+            <span class="text-sky-400 block font-bold" x-text="i18n[lang].carbs"></span>
             <span class="text-sm font-extrabold text-slate-200" x-text="`${totals.carbs}g / ${targets.carbs}g`"></span>
           </div>
           <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700">
-            <span class="text-emerald-400 block font-bold">Protein</span>
+            <span class="text-emerald-400 block font-bold" x-text="i18n[lang].protein"></span>
             <span class="text-sm font-extrabold text-slate-200" x-text="`${totals.protein}g / ${targets.protein}g`"></span>
           </div>
           <div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700">
-            <span class="text-amber-400 block font-bold">Fats</span>
+            <span class="text-amber-400 block font-bold" x-text="i18n[lang].fats"></span>
             <span class="text-sm font-extrabold text-slate-200" x-text="`${totals.fat}g / ${targets.fat}g`"></span>
           </div>
         </div>
@@ -105,9 +107,8 @@
       <!-- Meals Breakdown -->
       <section class="space-y-4">
         <div class="flex items-center justify-between">
-          <h3 class="font-bold text-slate-200 text-base">Today's Intake</h3>
-          <button @click="addSnackSlot()" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 font-semibold px-2.5 py-1 rounded-lg transition">
-            + Add Snack Slot
+          <h3 class="font-bold text-slate-200 text-base" x-text="i18n[lang].todaysIntake"></h3>
+          <button @click="addSnackSlot()" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 font-semibold px-2.5 py-1 rounded-lg transition" x-text="i18n[lang].addSnackSlot">
           </button>
         </div>
 
@@ -116,7 +117,7 @@
           <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-3 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
               <div class="flex items-center gap-2">
-                <span class="capitalize font-bold text-slate-200 text-sm" x-text="meal.type"></span>
+                <span class="capitalize font-bold text-slate-200 text-sm" x-text="getMealLabel(meal.type)"></span>
                 <span x-show="meal.time" class="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full font-mono" x-text="meal.time"></span>
               </div>
               <span class="text-xs font-semibold text-emerald-400" x-text="`${getMealCalories(meal)} kcal`"></span>
@@ -139,8 +140,7 @@
                   </div>
                 </div>
               </template>
-              <div x-show="meal.items.length === 0" class="text-slate-500 text-xs italic py-1 text-center">
-                No items logged for this meal.
+              <div x-show="meal.items.length === 0" class="text-slate-500 text-xs italic py-1 text-center" x-text="i18n[lang].noItems">
               </div>
             </div>
           </div>
@@ -151,26 +151,26 @@
     <!-- WEEKLY ANALYTICS TAB -->
     <div x-show="activeTab === 'weekly'" class="space-y-4" x-cloak>
       <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-4">
-        <h3 class="font-bold text-slate-200 text-sm">Weekly Overview (Mon - Sun)</h3>
+        <h3 class="font-bold text-slate-200 text-sm" x-text="i18n[lang].weeklyOverview"></h3>
         
         <div class="grid grid-cols-2 gap-3 text-xs">
           <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
-            <span class="text-slate-400 block text-[11px]">Avg Daily Calories</span>
+            <span class="text-slate-400 block text-[11px]" x-text="i18n[lang].avgDailyCalories"></span>
             <span class="text-lg font-bold text-emerald-400" x-text="`${weeklyStats.avgCalories} kcal`"></span>
           </div>
           <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
-            <span class="text-slate-400 block text-[11px]">Avg Daily Carbs</span>
+            <span class="text-slate-400 block text-[11px]" x-text="i18n[lang].avgDailyCarbs"></span>
             <span class="text-lg font-bold text-sky-400" x-text="`${weeklyStats.avgCarbs}g`"></span>
           </div>
         </div>
 
         <div>
-          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Most Eaten Foods</h4>
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" x-text="i18n[lang].mostEatenFoods"></h4>
           <div class="space-y-1.5 text-xs">
             <template x-for="food in weeklyStats.topFoods" :key="food.name">
               <div class="flex justify-between bg-slate-900 p-2.5 rounded-lg border border-slate-700/50">
                 <span class="text-slate-200 font-medium" x-text="food.name"></span>
-                <span class="text-emerald-400 font-semibold" x-text="`${food.count}x logged`"></span>
+                <span class="text-emerald-400 font-semibold" x-text="`${food.count}x ${i18n[lang].loggedCount}`"></span>
               </div>
             </template>
           </div>
@@ -183,22 +183,19 @@
   <div x-show="showJsonDrawer" x-cloak class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
     <div @click.away="showJsonDrawer = false" class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-700 pb-3">
-        <h3 class="font-bold text-slate-100 text-sm">AI Assistant JSON Import</h3>
+        <h3 class="font-bold text-slate-100 text-sm" x-text="i18n[lang].jsonImportTitle"></h3>
         <button @click="showJsonDrawer = false" class="text-slate-400 hover:text-slate-200 font-bold">✕</button>
       </div>
 
-      <p class="text-xs text-slate-400">
-        Paste the structured JSON response generated by your AI assistant below to auto-populate your meals.
+      <p class="text-xs text-slate-400" x-text="i18n[lang].jsonNotice">
       </p>
 
-      <textarea x-model="jsonInput" placeholder='Paste JSON here, e.g. {"meal": "breakfast", "time": "08:30", "items": [...]}' class="w-full h-44 bg-slate-900 text-slate-200 border border-slate-700 rounded-xl p-3 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+      <textarea x-model="jsonInput" placeholder='Paste JSON here, e.g. {"meal": "закуска", "time": "08:30", "items": [...]}' class="w-full h-44 bg-slate-900 text-slate-200 border border-slate-700 rounded-xl p-3 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
 
       <div class="flex gap-2">
-        <button @click="importJson()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs py-2.5 rounded-xl transition">
-          Import Intake JSON
+        <button @click="importJson()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs py-2.5 rounded-xl transition" x-text="i18n[lang].importBtn">
         </button>
-        <button @click="exportTodayJson()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold text-xs px-3 py-2.5 rounded-xl transition">
-          Copy Today's Raw JSON
+        <button @click="exportTodayJson()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold text-xs px-3 py-2.5 rounded-xl transition" x-text="i18n[lang].copyRawBtn">
         </button>
       </div>
     </div>
@@ -208,12 +205,13 @@
     function macroApp() {
       return {
         activeTab: 'daily',
-        chartType: 'bars', // 'bars' or 'pie'
+        chartType: 'bars',
         showJsonDrawer: false,
         jsonInput: '',
         chartInstance: null,
+        lang: 'en', // 'en' or 'bg'
 
-        // Updated Macro Targets: 1,800 kcal | 150g Carbs | 140g Protein | 70g Fat
+        // Recalibrated Macro Targets: 1,800 kcal | 150g Carbs | 140g Protein | 70g Fat
         targets: { calories: 1800, carbs: 150, protein: 140, fat: 70 },
 
         meals: [
@@ -222,6 +220,57 @@
           { type: 'dinner', time: '19:30', items: [] },
           { type: 'snack', time: '16:00', items: [] }
         ],
+
+        i18n: {
+          en: {
+            jsonField: '📥 JSON Field',
+            dailyLog: 'Daily Log',
+            weeklyAnalytics: 'Weekly Analytics',
+            caloriesToday: 'Calories Today',
+            verticalBars: 'Vertical Bars',
+            macroPie: 'Macro Pie',
+            carbs: 'Carbs',
+            protein: 'Protein',
+            fats: 'Fats',
+            todaysIntake: "Today's Intake",
+            addSnackSlot: '+ Add Snack Slot',
+            noItems: 'No items logged for this meal.',
+            weeklyOverview: 'Weekly Overview (Mon - Sun)',
+            avgDailyCalories: 'Avg Daily Calories',
+            avgDailyCarbs: 'Avg Daily Carbs',
+            mostEatenFoods: 'Most Eaten Foods',
+            loggedCount: 'logged',
+            jsonImportTitle: 'AI Assistant JSON Import',
+            jsonNotice: 'Paste the structured JSON response generated by your AI assistant below to auto-populate your meals.',
+            importBtn: 'Import Intake JSON',
+            copyRawBtn: "Copy Today's Raw JSON",
+            meals: { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' }
+          },
+          bg: {
+            jsonField: '📥 JSON Поле',
+            dailyLog: 'Дневен Дневник',
+            weeklyAnalytics: 'Седмичен Анализ',
+            caloriesToday: 'Калории Днес',
+            verticalBars: 'Вертикални Барове',
+            macroPie: 'Кръгова Диаграма',
+            carbs: 'Въглехидрати',
+            protein: 'Протеин',
+            fats: 'Мазнини',
+            todaysIntake: 'Прием за Днес',
+            addSnackSlot: '+ Добави Снак',
+            noItems: 'Няма въведени храни за това хранене.',
+            weeklyOverview: 'Седмичен Преглед (Пон - Нед)',
+            avgDailyCalories: 'Средно Калории/Ден',
+            avgDailyCarbs: 'Средно Въглехидрати/Ден',
+            mostEatenFoods: 'Най-често консумирани храни',
+            loggedCount: 'пъти въведено',
+            jsonImportTitle: 'AI Вход (JSON)',
+            jsonNotice: 'Поставете структурирания JSON от асистента тук, за да добавите храната си автоматично.',
+            importBtn: 'Импортирай JSON',
+            copyRawBtn: 'Копирай Дневния JSON',
+            meals: { breakfast: 'Закуска', lunch: 'Обяд', dinner: 'Вечеря', snack: 'Снак' }
+          }
+        },
 
         weeklyStats: {
           avgCalories: 1850,
@@ -234,16 +283,25 @@
         },
 
         initApp() {
-          const saved = localStorage.getItem('macro_meals_pwa');
-          if (saved) {
-            try { this.meals = JSON.parse(saved); } catch(e){}
+          const savedMeals = localStorage.getItem('macro_meals_pwa');
+          if (savedMeals) {
+            try { this.meals = JSON.parse(savedMeals); } catch(e){}
           }
+          const savedLang = localStorage.getItem('macro_lang');
+          if (savedLang) this.lang = savedLang;
+
           this.$nextTick(() => this.renderChart());
         },
 
         saveData() {
           localStorage.setItem('macro_meals_pwa', JSON.stringify(this.meals));
+          localStorage.setItem('macro_lang', this.lang);
           this.renderChart();
+        },
+
+        getMealLabel(type) {
+          const key = type.toLowerCase();
+          return this.i18n[this.lang].meals[key] || type;
         },
 
         get totals() {
@@ -282,9 +340,16 @@
               return;
             }
 
-            let targetMeal = this.meals.find(m => m.type.toLowerCase() === data.meal.toLowerCase() && m.items.length === 0);
-            if (!targetMeal || data.meal.toLowerCase() === 'snack') {
-              targetMeal = { type: data.meal.toLowerCase(), time: data.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), items: [] };
+            const rawMeal = data.meal.toLowerCase();
+            let normalizedType = rawMeal;
+            if (['закуска', 'breakfast'].includes(rawMeal)) normalizedType = 'breakfast';
+            else if (['обяд', 'lunch'].includes(rawMeal)) normalizedType = 'lunch';
+            else if (['вечеря', 'dinner'].includes(rawMeal)) normalizedType = 'dinner';
+            else if (['снак', 'snack', 'междинно', 'закуски'].includes(rawMeal)) normalizedType = 'snack';
+
+            let targetMeal = this.meals.find(m => m.type.toLowerCase() === normalizedType && m.items.length === 0);
+            if (!targetMeal || normalizedType === 'snack') {
+              targetMeal = { type: normalizedType, time: data.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), items: [] };
               this.meals.push(targetMeal);
             }
 
@@ -308,14 +373,22 @@
 
           if (this.chartInstance) this.chartInstance.destroy();
 
+          const labels = this.lang === 'bg' 
+            ? ['Калории (/10)', 'Въглехидрати (g)', 'Протеин (g)', 'Мазнини (g)']
+            : ['Calories (/10)', 'Carbs (g)', 'Protein (g)', 'Fat (g)'];
+
+          const pieLabels = this.lang === 'bg'
+            ? ['Въглехидрати (g)', 'Протеин (g)', 'Мазнини (g)']
+            : ['Carbs (g)', 'Protein (g)', 'Fat (g)'];
+
           if (this.chartType === 'bars') {
             this.chartInstance = new Chart(ctx, {
               type: 'bar',
               data: {
-                labels: ['Calories (/10)', 'Carbs (g)', 'Protein (g)', 'Fat (g)'],
+                labels: labels,
                 datasets: [
-                  { label: 'Intake', data: [this.totals.calories / 10, this.totals.carbs, this.totals.protein, this.totals.fat], backgroundColor: '#10b981', borderRadius: 6 },
-                  { label: 'Target', data: [this.targets.calories / 10, this.targets.carbs, this.targets.protein, this.targets.fat], backgroundColor: '#334155', borderRadius: 6 }
+                  { label: this.lang === 'bg' ? 'Прием' : 'Intake', data: [this.totals.calories / 10, this.totals.carbs, this.totals.protein, this.totals.fat], backgroundColor: '#10b981', borderRadius: 6 },
+                  { label: this.lang === 'bg' ? 'Цел' : 'Target', data: [this.targets.calories / 10, this.targets.carbs, this.targets.protein, this.targets.fat], backgroundColor: '#334155', borderRadius: 6 }
                 ]
               },
               options: {
@@ -332,7 +405,7 @@
             this.chartInstance = new Chart(ctx, {
               type: 'pie',
               data: {
-                labels: ['Carbs (g)', 'Protein (g)', 'Fat (g)'],
+                labels: pieLabels,
                 datasets: [{
                   data: [this.totals.carbs || 1, this.totals.protein || 1, this.totals.fat || 1],
                   backgroundColor: ['#38bdf8', '#10b981', '#fbbf24']
