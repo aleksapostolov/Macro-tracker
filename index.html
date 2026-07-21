@@ -24,7 +24,7 @@
 
   <style>
     [x-cloak] { display: none !important; }
-    /* Hide scrollbars for app-like clean look */
+    /* Hide touch highlights & selections for a native app feel */
     body {
       -webkit-tap-highlight-color: transparent;
       user-select: none;
@@ -213,7 +213,8 @@
         jsonInput: '',
         chartInstance: null,
 
-        targets: { calories: 2000, carbs: 150, protein: 130, fat: 80 },
+        // Updated Macro Targets: 1,800 kcal | 150g Carbs | 140g Protein | 70g Fat
+        targets: { calories: 1800, carbs: 150, protein: 140, fat: 70 },
 
         meals: [
           { type: 'breakfast', time: '08:30', items: [] },
