@@ -2,26 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>MacroTracker PWA</title>
+
+  <!-- PWA & Mobile Standalone Tags -->
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MacroTracker" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="https://fav.farm/🥗" />
+  <link rel="apple-touch-icon" href="https://fav.farm/🥗" />
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Alpine.js -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+    /* Hide scrollbars for app-like clean look */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-12 font-sans" x-data="macroApp()" x-init="initApp()">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12 font-sans antialiased" x-data="macroApp()" x-init="initApp()">
 
   <!-- Top Header Nav -->
-  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 px-4 py-3 shadow-md">
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 px-4 py-3 shadow-md pt-safe">
     <div class="max-w-2xl mx-auto flex items-center justify-between">
       <h1 class="font-bold text-lg text-emerald-400 flex items-center gap-2">
         <span>🥗</span> MacroTracker
       </h1>
       <div class="flex items-center gap-2">
-        <button @click="showJsonDrawer = true" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-medium transition">
-          📥 Import/Export JSON
+        <button @click="showJsonDrawer = true" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-lg border border-slate-600 font-medium transition active:scale-95">
+          📥 JSON Field
         </button>
       </div>
     </div>
@@ -46,7 +66,7 @@
       <section class="bg-slate-800 rounded-2xl p-4 border border-slate-700 shadow-sm space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-sm text-slate-400 font-medium">Daily Target vs Intake</h2>
+            <h2 class="text-xs text-slate-400 font-medium uppercase tracking-wider">Calories Today</h2>
             <p class="text-2xl font-black text-slate-100" x-text="`${totals.calories} / ${targets.calories} kcal`"></p>
           </div>
           <!-- Chart View Toggle -->
@@ -61,7 +81,7 @@
         </div>
 
         <!-- Chart Container -->
-        <div class="relative h-56 w-full flex items-center justify-center">
+        <div class="relative h-52 w-full flex items-center justify-center">
           <canvas id="macroChart"></canvas>
         </div>
 
@@ -85,39 +105,42 @@
       <!-- Meals Breakdown -->
       <section class="space-y-4">
         <div class="flex items-center justify-between">
-          <h3 class="font-bold text-slate-200 text-base">Today's Meals</h3>
-          <button @click="addSnackTime()" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 font-semibold px-2.5 py-1 rounded-lg transition">
+          <h3 class="font-bold text-slate-200 text-base">Today's Intake</h3>
+          <button @click="addSnackSlot()" class="text-xs bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 border border-emerald-500/30 font-semibold px-2.5 py-1 rounded-lg transition">
             + Add Snack Slot
           </button>
         </div>
 
         <!-- Meal Cards -->
         <template x-for="(meal, index) in meals" :key="index">
-          <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-3">
+          <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-3 shadow-sm">
             <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
               <div class="flex items-center gap-2">
-                <span class="capitalize font-bold text-slate-200" x-text="meal.type"></span>
-                <span x-show="meal.time" class="text-xs bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full" x-text="meal.time"></span>
+                <span class="capitalize font-bold text-slate-200 text-sm" x-text="meal.type"></span>
+                <span x-show="meal.time" class="text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded-full font-mono" x-text="meal.time"></span>
               </div>
-              <span class="text-xs font-semibold text-slate-400" x-text="`${getMealCalories(meal)} kcal`"></span>
+              <span class="text-xs font-semibold text-emerald-400" x-text="`${getMealCalories(meal)} kcal`"></span>
             </div>
 
             <!-- Meal Items -->
             <div class="space-y-2">
               <template x-for="(item, itemIndex) in meal.items" :key="itemIndex">
-                <div class="flex items-center justify-between bg-slate-900/40 p-2 rounded-lg text-xs">
+                <div class="flex items-center justify-between bg-slate-900/50 p-2.5 rounded-lg text-xs border border-slate-700/40">
                   <div>
-                    <span class="font-semibold text-slate-200" x-text="item.name"></span>
-                    <span class="text-slate-500 text-[10px] block" x-text="item.quantity"></span>
+                    <span class="font-semibold text-slate-100 block" x-text="item.name"></span>
+                    <span class="text-slate-400 text-[11px]" x-text="item.quantity"></span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span class="text-slate-400" x-text="`${item.calories}c | ${item.carbs}c / ${item.protein}p / ${item.fat}f`"></span>
-                    <button @click="deleteItem(index, itemIndex)" class="text-rose-400 hover:text-rose-300 font-bold px-1">✕</button>
+                    <div class="text-right">
+                      <span class="text-slate-200 font-bold block" x-text="`${item.calories} kcal`"></span>
+                      <span class="text-slate-400 text-[10px]" x-text="`${item.carbs}c / ${item.protein}p / ${item.fat}f`"></span>
+                    </div>
+                    <button @click="deleteItem(index, itemIndex)" class="text-rose-400 hover:text-rose-300 font-bold px-1 py-1 transition">✕</button>
                   </div>
                 </div>
               </template>
-              <div x-show="meal.items.length === 0" class="text-slate-500 text-xs italic py-1">
-                No entries logged yet.
+              <div x-show="meal.items.length === 0" class="text-slate-500 text-xs italic py-1 text-center">
+                No items logged for this meal.
               </div>
             </div>
           </div>
@@ -126,16 +149,17 @@
     </div>
 
     <!-- WEEKLY ANALYTICS TAB -->
-    <div x-show="activeTab === 'weekly'" class="space-y-4">
+    <div x-show="activeTab === 'weekly'" class="space-y-4" x-cloak>
       <div class="bg-slate-800 rounded-xl p-4 border border-slate-700 space-y-4">
-        <h3 class="font-bold text-slate-200">Weekly Performance (Mon - Sun)</h3>
+        <h3 class="font-bold text-slate-200 text-sm">Weekly Overview (Mon - Sun)</h3>
+        
         <div class="grid grid-cols-2 gap-3 text-xs">
           <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
-            <span class="text-slate-400 block">Avg Daily Calories</span>
+            <span class="text-slate-400 block text-[11px]">Avg Daily Calories</span>
             <span class="text-lg font-bold text-emerald-400" x-text="`${weeklyStats.avgCalories} kcal`"></span>
           </div>
           <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
-            <span class="text-slate-400 block">Avg Daily Carbs</span>
+            <span class="text-slate-400 block text-[11px]">Avg Daily Carbs</span>
             <span class="text-lg font-bold text-sky-400" x-text="`${weeklyStats.avgCarbs}g`"></span>
           </div>
         </div>
@@ -144,9 +168,9 @@
           <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Most Eaten Foods</h4>
           <div class="space-y-1.5 text-xs">
             <template x-for="food in weeklyStats.topFoods" :key="food.name">
-              <div class="flex justify-between bg-slate-900 p-2 rounded border border-slate-700/50">
+              <div class="flex justify-between bg-slate-900 p-2.5 rounded-lg border border-slate-700/50">
                 <span class="text-slate-200 font-medium" x-text="food.name"></span>
-                <span class="text-emerald-400 font-semibold" x-text="`${food.count}x eaten`"></span>
+                <span class="text-emerald-400 font-semibold" x-text="`${food.count}x logged`"></span>
               </div>
             </template>
           </div>
@@ -155,25 +179,25 @@
     </div>
   </main>
 
-  <!-- HIDDEN JSON IMPORT/EXPORT DRAWER MODAL -->
+  <!-- HIDDEN JSON IMPORT/EXPORT MODAL -->
   <div x-show="showJsonDrawer" x-cloak class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm">
     <div @click.away="showJsonDrawer = false" class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-lg p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-700 pb-3">
-        <h3 class="font-bold text-slate-100">AI Assistant JSON Field</h3>
+        <h3 class="font-bold text-slate-100 text-sm">AI Assistant JSON Import</h3>
         <button @click="showJsonDrawer = false" class="text-slate-400 hover:text-slate-200 font-bold">✕</button>
       </div>
 
       <p class="text-xs text-slate-400">
-        Paste the structured JSON response generated by the AI assistant below to automatically import your meal entry.
+        Paste the structured JSON response generated by your AI assistant below to auto-populate your meals.
       </p>
 
-      <textarea x-model="jsonInput" placeholder="Paste JSON here..." class="w-full h-44 bg-slate-900 text-slate-200 border border-slate-700 rounded-xl p-3 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+      <textarea x-model="jsonInput" placeholder='Paste JSON here, e.g. {"meal": "breakfast", "time": "08:30", "items": [...]}' class="w-full h-44 bg-slate-900 text-slate-200 border border-slate-700 rounded-xl p-3 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
 
       <div class="flex gap-2">
-        <button @click="importJson()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs py-2.5 rounded-xl transition">
-          Import Payload
+        <button @click="importJson()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-semibold text-xs py-2.5 rounded-xl transition">
+          Import Intake JSON
         </button>
-        <button @click="exportTodayJson()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold text-xs px-4 py-2.5 rounded-xl transition">
+        <button @click="exportTodayJson()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold text-xs px-3 py-2.5 rounded-xl transition">
           Copy Today's Raw JSON
         </button>
       </div>
@@ -202,14 +226,14 @@
           avgCalories: 1850,
           avgCarbs: 110,
           topFoods: [
-            { name: 'Large Eggs', count: 12 },
+            { name: 'Eggs', count: 12 },
             { name: 'Avocado', count: 6 },
             { name: 'Chicken Breast', count: 5 }
           ]
         },
 
         initApp() {
-          const saved = localStorage.getItem('macro_meals');
+          const saved = localStorage.getItem('macro_meals_pwa');
           if (saved) {
             try { this.meals = JSON.parse(saved); } catch(e){}
           }
@@ -217,7 +241,7 @@
         },
 
         saveData() {
-          localStorage.setItem('macro_meals', JSON.stringify(this.meals));
+          localStorage.setItem('macro_meals_pwa', JSON.stringify(this.meals));
           this.renderChart();
         },
 
@@ -238,7 +262,7 @@
           return meal.items.reduce((acc, i) => acc + Number(i.calories || 0), 0);
         },
 
-        addSnackTime() {
+        addSnackSlot() {
           const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           this.meals.push({ type: 'snack', time, items: [] });
           this.saveData();
@@ -253,13 +277,13 @@
           try {
             const data = JSON.parse(this.jsonInput);
             if (!data.meal || !Array.isArray(data.items)) {
-              alert('Invalid payload format.');
+              alert('Invalid payload structure. Ensure "meal" and "items" array exist.');
               return;
             }
 
-            let targetMeal = this.meals.find(m => m.type.toLowerCase() === data.meal.toLowerCase());
+            let targetMeal = this.meals.find(m => m.type.toLowerCase() === data.meal.toLowerCase() && m.items.length === 0);
             if (!targetMeal || data.meal.toLowerCase() === 'snack') {
-              targetMeal = { type: data.meal, time: data.time || '', items: [] };
+              targetMeal = { type: data.meal.toLowerCase(), time: data.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), items: [] };
               this.meals.push(targetMeal);
             }
 
@@ -268,13 +292,13 @@
             this.jsonInput = '';
             this.showJsonDrawer = false;
           } catch(e) {
-            alert('JSON Parse Error. Make sure you copied the exact code block.');
+            alert('JSON Parse Error. Make sure to copy the exact raw JSON.');
           }
         },
 
         exportTodayJson() {
           navigator.clipboard.writeText(JSON.stringify(this.meals, null, 2));
-          alert('Copied today\'s complete meal payload to clipboard!');
+          alert('Today\'s raw JSON copied to clipboard!');
         },
 
         renderChart() {
@@ -287,25 +311,37 @@
             this.chartInstance = new Chart(ctx, {
               type: 'bar',
               data: {
-                labels: ['Calories (x10)', 'Carbs (g)', 'Protein (g)', 'Fat (g)'],
+                labels: ['Calories (/10)', 'Carbs (g)', 'Protein (g)', 'Fat (g)'],
                 datasets: [
-                  { label: 'Intake', data: [this.totals.calories / 10, this.totals.carbs, this.totals.protein, this.totals.fat], backgroundColor: '#10b981' },
-                  { label: 'Target', data: [this.targets.calories / 10, this.targets.carbs, this.targets.protein, this.targets.fat], backgroundColor: '#334155' }
+                  { label: 'Intake', data: [this.totals.calories / 10, this.totals.carbs, this.totals.protein, this.totals.fat], backgroundColor: '#10b981', borderRadius: 6 },
+                  { label: 'Target', data: [this.targets.calories / 10, this.targets.carbs, this.targets.protein, this.targets.fat], backgroundColor: '#334155', borderRadius: 6 }
                 ]
               },
-              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+                scales: {
+                  x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+                  y: { ticks: { color: '#64748b' }, grid: { color: '#334155' } }
+                }
+              }
             });
           } else {
             this.chartInstance = new Chart(ctx, {
               type: 'pie',
               data: {
-                labels: ['Carbs', 'Protein', 'Fat'],
+                labels: ['Carbs (g)', 'Protein (g)', 'Fat (g)'],
                 datasets: [{
-                  data: [this.totals.carbs, this.totals.protein, this.totals.fat],
+                  data: [this.totals.carbs || 1, this.totals.protein || 1, this.totals.fat || 1],
                   backgroundColor: ['#38bdf8', '#10b981', '#fbbf24']
                 }]
               },
-              options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } }
+              }
             });
           }
         }
@@ -314,4 +350,3 @@
   </script>
 </body>
 </html>
-
